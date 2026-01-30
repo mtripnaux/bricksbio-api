@@ -22,24 +22,46 @@ impl Provider for IgemPartsProvider {
         println!("    Parsing iGEM Parts HTML, length: {}", html_text.len());
         
         let document = Html::parse_document(html_text);
-        
-        let description = if let Ok(selector) = Selector::parse("span#part_desc") {
-            document.select(&selector)
-                .next()
-                .map(|el| el.text().collect::<String>().trim().to_string())
-                .unwrap_or_default()
-        } else {
-            String::new()
-        };
-        
-        let name = if !description.is_empty() {
-            description.clone()
-        } else {
-            id.to_string()
-        };
-        
-        println!("    Found functional name: {}", name);
-        
+
+        let mut name = String::new();
+        let mut description = String::new();
+        let p_selector = Selector::parse("p").unwrap();
+        let span_selector = Selector::parse("span").unwrap();
+        if let Ok(content_sel) = Selector::parse("#mw-content-text") {
+            if let Some(content) = document.select(&content_sel).next() {
+                let mut ps = content.select(&p_selector);
+                if let Some(first_p) = ps.next() {
+                    if let Some(span) = first_p.select(&span_selector).next() {
+                        name = span.text().collect::<String>().trim().to_string();
+                    }
+                    if let Some(second_p) = ps.next() {
+                        description = second_p.text().collect::<String>().trim().to_string();
+                    }
+                }
+            }
+        }
+
+        if name.is_empty() {
+            if let Ok(selector) = Selector::parse("span#part_name") {
+                name = document.select(&selector)
+                    .next()
+                    .map(|el| el.text().collect::<String>().trim().to_string())
+                    .filter(|n| !n.is_empty())
+                    .unwrap_or_else(|| id.to_string());
+            } else {
+                name = id.to_string();
+            }
+        }
+
+        if description.is_empty() {
+            if let Ok(p_sel) = Selector::parse("p") {
+                description = document.select(&p_sel)
+                    .next()
+                    .map(|el| el.text().collect::<String>().trim().to_string())
+                    .unwrap_or_default();
+            }
+        }
+
         let edit_html = match fetch_edit_page(id) {
             Ok(html) => html,
             Err(e) => {
