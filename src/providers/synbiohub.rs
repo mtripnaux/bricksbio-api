@@ -19,6 +19,9 @@ impl Provider for SynBioHubProvider {
     
     fn parse(&self, id: &str, text: &str) -> Option<Biobrick> {
         parse_genbank_raw(text)
-            .map(|gb_data| genbank_to_biobrick(id, self.name(), &self.link(id), gb_data))
+            .map(|gb_data| {
+                let now = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+                genbank_to_biobrick(id, self.name(), &self.link(id), gb_data, now)
+            })
     }
 }

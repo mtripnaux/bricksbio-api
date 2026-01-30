@@ -16,6 +16,14 @@ pub fn enrich(biobrick1: Biobrick, biobrick2: Biobrick) -> Biobrick {
 
     let merged_authors = concat_unique_authors(&biobrick1.metadata.authors, &biobrick2.metadata.authors);
 
+    let creation = {
+        let d1 = &biobrick1.metadata.creation;
+        let d2 = &biobrick2.metadata.creation;
+        if d1.is_empty() { d2.clone() }
+        else if d2.is_empty() { d1.clone() }
+        else if d1 < d2 { d1.clone() } else { d2.clone() }
+    };
+    
     Biobrick {
         metadata: MetaBiobrick {
             id: biobrick1.metadata.id.clone(),
@@ -32,6 +40,7 @@ pub fn enrich(biobrick1: Biobrick, biobrick2: Biobrick) -> Biobrick {
             ),
             description: merge_strings(&biobrick1.metadata.description, &biobrick2.metadata.description),
             authors: merged_authors,
+            creation,
         },
         sequence: biobrick1.sequence,
         features: clean_features_list(merged_features, biobrick1.metadata.size),

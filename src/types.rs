@@ -26,6 +26,7 @@ pub struct MetaFeature {
 pub struct MetaProvider {
     pub name: String,
     pub link: String,
+    pub date: String, // ISO 8601 format
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -34,10 +35,11 @@ pub struct MetaBiobrick {
     pub id: String,
     pub name: String,
     pub description: String,
-    pub authors: Vec<Author>,
+    pub creation: String, // ISO 8601 format
     pub size: i32,
     pub circular: bool,
     pub r#type: crate::ontology::OntologyEntrySerializable,
+    pub authors: Vec<Author>,
     pub providers: Vec<MetaProvider>,
 }
 

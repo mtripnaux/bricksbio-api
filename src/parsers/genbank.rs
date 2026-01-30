@@ -113,7 +113,7 @@ fn parse_location(loc: &str) -> Option<(i32, i32, i32)> {
     None
 }
 
-pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_data: GenBankData) -> Biobrick {
+pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_data: GenBankData, date: String) -> Biobrick {
     let size = gb_data.sequence.len() as i32;
     let features: Vec<MetaFeature> = gb_data.features.iter().map(|f| {
         let name = f.qualifiers.iter()
@@ -147,9 +147,11 @@ pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_dat
             providers: vec![MetaProvider {
                 name: provider.to_string(),
                 link: provider_link.to_string(),
+                date,
             }],
             description: gb_data.definition,
             authors: vec![],
+            creation: String::new(),
         },
         sequence: gb_data.sequence,
         features,

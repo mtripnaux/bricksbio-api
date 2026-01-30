@@ -89,6 +89,7 @@ impl Provider for IgemPartsProvider {
         
         let part_type = extract_part_type(&document).unwrap_or_else(|| "unknown".to_string());
         
+            let now = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
             Some(Biobrick {
                 metadata: MetaBiobrick {
                     id: id.to_string(),
@@ -99,9 +100,11 @@ impl Provider for IgemPartsProvider {
                     providers: vec![MetaProvider {
                         name: self.name().to_string(),
                         link: self.link(id),
+                        date: now.clone(),
                     }],
                     description,
                     authors,
+                    creation: String::new(),
                 },
                 sequence,
                 features,
