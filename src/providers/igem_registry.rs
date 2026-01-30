@@ -29,9 +29,7 @@ impl Provider for IgemApiProvider {
         let features = vec![]; // API v1 ne fournit pas les features détaillées
         let authors = api_part.authors.unwrap_or_default().into_iter().map(|a| Author {
             name: a,
-            orcid: None,
-            email: None,
-            affiliation: None,
+            role: None,
         }).collect();
         Some(Biobrick {
             metadata: MetaBiobrick {
@@ -45,10 +43,10 @@ impl Provider for IgemApiProvider {
                     link: self.link(id),
                 }],
                 description: api_part.short_description.unwrap_or_default(),
-                features,
+                authors,
             },
             sequence,
-            authors,
+            features,
         })
     }
 }

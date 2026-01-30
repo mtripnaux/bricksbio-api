@@ -3,9 +3,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Author {
     pub name: String,
-    pub orcid: Option<String>,
-    pub email: Option<String>,
-    pub affiliation: Option<String>,
+    pub role: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -35,17 +33,17 @@ pub struct MetaProvider {
 pub struct MetaBiobrick {
     pub id: String,
     pub name: String,
-    pub r#type: crate::ontology::OntologyEntrySerializable,
-    pub circular: bool,
-    pub size: i32,
-    pub providers: Vec<MetaProvider>,
     pub description: String,
-    pub features: Vec<MetaFeature>,
+    pub authors: Vec<Author>,
+    pub size: i32,
+    pub circular: bool,
+    pub r#type: crate::ontology::OntologyEntrySerializable,
+    pub providers: Vec<MetaProvider>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Biobrick {
     pub metadata: MetaBiobrick,
     pub sequence: String,
-    pub authors: Vec<Author>,
+    pub features: Vec<MetaFeature>,
 }

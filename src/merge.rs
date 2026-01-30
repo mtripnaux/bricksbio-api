@@ -11,10 +11,10 @@ pub fn enrich(biobrick1: Biobrick, biobrick2: Biobrick) -> Biobrick {
         panic!("Mismatched ids");
     }
 
-    let mut merged_features = biobrick1.metadata.features.clone();
-    merged_features.extend(biobrick2.metadata.features);
+    let mut merged_features = biobrick1.features.clone();
+    merged_features.extend(biobrick2.features.clone());
 
-    let merged_authors = concat_unique_authors(&biobrick1.authors, &biobrick2.authors);
+    let merged_authors = concat_unique_authors(&biobrick1.metadata.authors, &biobrick2.metadata.authors);
 
     Biobrick {
         metadata: MetaBiobrick {
@@ -31,10 +31,10 @@ pub fn enrich(biobrick1: Biobrick, biobrick2: Biobrick) -> Biobrick {
                 &biobrick2.metadata.providers,
             ),
             description: merge_strings(&biobrick1.metadata.description, &biobrick2.metadata.description),
-            features: clean_features_list(merged_features, biobrick1.metadata.size),
+            authors: merged_authors,
         },
         sequence: biobrick1.sequence,
-        authors: merged_authors,
+        features: clean_features_list(merged_features, biobrick1.metadata.size),
     }
 }
 

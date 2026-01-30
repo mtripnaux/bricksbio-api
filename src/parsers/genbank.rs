@@ -149,9 +149,9 @@ pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_dat
                 link: provider_link.to_string(),
             }],
             description: gb_data.definition,
-            features,
+            authors: vec![],
         },
         sequence: gb_data.sequence,
-        authors: vec![],
+        features,
     }
 }

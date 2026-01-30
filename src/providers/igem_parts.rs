@@ -89,23 +89,23 @@ impl Provider for IgemPartsProvider {
         
         let part_type = extract_part_type(&document).unwrap_or_else(|| "unknown".to_string());
         
-        Some(Biobrick {
-            metadata: MetaBiobrick {
-                id: id.to_string(),
-                name,
-                r#type: multiple_type_inference(&[part_type.clone(), description.clone()]).into(),
-                circular: false,
-                size: sequence.len() as i32,
-                providers: vec![MetaProvider {
-                    name: self.name().to_string(),
-                    link: self.link(id),
-                }],
-                description,
+            Some(Biobrick {
+                metadata: MetaBiobrick {
+                    id: id.to_string(),
+                    name,
+                    r#type: multiple_type_inference(&[part_type.clone(), description.clone()]).into(),
+                    circular: false,
+                    size: sequence.len() as i32,
+                    providers: vec![MetaProvider {
+                        name: self.name().to_string(),
+                        link: self.link(id),
+                    }],
+                    description,
+                    authors,
+                },
+                sequence,
                 features,
-            },
-            sequence,
-            authors,
-        })
+            })
     }
 }
 
@@ -193,9 +193,7 @@ fn extract_authors_from_edit(document: &Html) -> Vec<Author> {
                     for name in names {
                         authors.push(Author {
                             name,
-                            orcid: None,
-                            email: None,
-                            affiliation: None,
+                            role: None,
                         });
                     }
                     if !authors.is_empty() {
@@ -291,9 +289,7 @@ fn extract_authors(document: &Html) -> Vec<Author> {
                         if seen_names.insert(name.clone()) {
                             authors.push(Author {
                                 name,
-                                orcid: None,
-                                email: None,
-                                affiliation: None,
+                                role: None,
                             });
                         }
                     }
