@@ -6,7 +6,7 @@ pub struct SynBioHubProvider;
 
 impl Provider for SynBioHubProvider {
     fn name(&self) -> &'static str {
-        "SynBioHub-iGEM"
+        "iGEM via SynBioHub"
     }
     
     fn link(&self, id: &str) -> String {
