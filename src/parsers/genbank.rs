@@ -2,9 +2,11 @@ use crate::types::{Biobrick, MetaBiobrick, MetaFeature, MetaProvider, Location};
 use crate::ontology::multiple_type_inference;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct GenBankData {
     pub name: String,
     pub definition: String,
+    pub creation: Option<String>,
     pub sequence: String,
     pub circular: bool,
     pub features: Vec<GenBankFeature>,
@@ -31,6 +33,7 @@ pub fn parse_genbank_raw(text: &str) -> Option<GenBankData> {
     let mut features = Vec::new();
     let mut in_features = false;
     let mut in_origin = false;
+    let mut creation = None;
     for line in lines {
         let trimmed = line.trim();
         if line.starts_with("LOCUS") {
@@ -40,6 +43,12 @@ pub fn parse_genbank_raw(text: &str) -> Option<GenBankData> {
             }
             if line.contains("circular") {
                 circular = true;
+            }
+            if parts.len() >= 6 {
+                let date_str = parts[parts.len()-1];
+                if let Ok(parsed) = chrono::NaiveDate::parse_from_str(date_str, "%d-%b-%Y") {
+                    creation = Some(parsed.format("%Y-%m-%dT00:00:00.000Z").to_string());
+                }
             }
         } else if line.starts_with("DEFINITION") {
             definition = line["DEFINITION".len()..].trim().to_string();
@@ -93,6 +102,7 @@ pub fn parse_genbank_raw(text: &str) -> Option<GenBankData> {
         sequence,
         circular,
         features,
+        creation,
     })
 }
 
@@ -132,10 +142,10 @@ pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_dat
             },
         }
     }).collect();
-    let name = if gb_data.name.is_empty() {
-        id.to_string()
+    let name = if gb_data.definition.is_empty() {
+        String::from("")
     } else {
-        gb_data.name
+        gb_data.definition.clone()
     };
     Biobrick {
         metadata: MetaBiobrick {
@@ -149,9 +159,9 @@ pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_dat
                 link: provider_link.to_string(),
                 date,
             }],
-            description: gb_data.definition,
+            description: String::from(""),
             authors: vec![],
-            creation: String::new(),
+            creation: gb_data.creation.unwrap_or_default(),
         },
         sequence: gb_data.sequence,
         features,
