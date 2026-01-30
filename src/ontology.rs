@@ -4,27 +4,30 @@ use std::collections::HashSet;
 #[derive(Debug, Clone)]
 pub struct OntologyEntry {
     pub canonical: &'static str,
-    pub so: Option<&'static str>,
+    pub ontology: Option<&'static str>,
     pub css: &'static str,
     pub also: &'static [&'static str],
+    pub slug: &'static str,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(crate = "serde")]
 pub struct OntologyEntrySerializable {
     pub canonical: String,
-    pub so: Option<String>,
+    pub ontology: Option<String>,
     pub css: String,
     pub also: Vec<String>,
+    pub slug: String,
 }
 
 impl From<&OntologyEntry> for OntologyEntrySerializable {
     fn from(entry: &OntologyEntry) -> Self {
         OntologyEntrySerializable {
             canonical: entry.canonical.to_string(),
-            so: entry.so.map(|s| s.to_string()),
+            ontology: entry.ontology.map(|s| s.to_string()),
             css: entry.css.to_string(),
             also: entry.also.iter().map(|s| s.to_string()).collect(),
+            slug: entry.slug.to_string(),
         }
     }
 }
@@ -32,49 +35,56 @@ impl From<&OntologyEntry> for OntologyEntrySerializable {
 pub const ONTOLOGY: &[OntologyEntry] = &[
     OntologyEntry {
         canonical: "sequence_feature",
-        so: None,
+        ontology: None,
         css: "sequence-feature",
         also: &[],
+        slug: "misc",
     },
     OntologyEntry {
         canonical: "coding_sequence",
-        so: Some("SO:0000316"),
+        ontology: Some("SO:0000316"),
         css: "cds",
         also: &["coding sequence", "cds", "coding region"],
+        slug: "cds",
     },
     OntologyEntry {
         canonical: "ribosome_entry_site",
-        so: Some("SO:0000139"),
+        ontology: Some("SO:0000139"),
         css: "ribosome-entry-site",
         also: &["rbs", "ribosome binding", "ribosome entry"],
+        slug: "rbs",
     },
     OntologyEntry {
         canonical: "scar",
-        so: None,
+        ontology: None,
         css: "scar",
         also: &[],
+        slug: "scar",
     },
     OntologyEntry {
         canonical: "promoter",
-        so: Some("SO:0000167"),
+        ontology: Some("SO:0000167"),
         css: "promoter",
         also: &[],
+        slug: "promoter",
     },
     OntologyEntry {
         canonical: "stop_codon",
-        so: Some("SO:0000319"),
+        ontology: Some("SO:0000319"),
         css: "stop-codon",
         also: &[],
+        slug: "stop-codon",
     },
     OntologyEntry {
         canonical: "operator",
-        so: Some("SO:0000057"),
+        ontology: Some("SO:0000057"),
         css: "operator",
         also: &[],
+        slug: "operator",
     },
     OntologyEntry {
         canonical: "primer_binding_site",
-        so: Some("SO:0005850"),
+        ontology: Some("SO:0005850"),
         css: "primer-binding-site",
         also: &[
             "primer entry site",
@@ -83,54 +93,63 @@ pub const ONTOLOGY: &[OntologyEntry] = &[
             "primer binding",
             "primer entry",
         ],
+        slug: "primer-binding-site",
     },
     OntologyEntry {
         canonical: "terminator",
-        so: Some("SO:0000141"),
+        ontology: Some("SO:0000141"),
         css: "terminator",
         also: &[],
+        slug: "terminator",
     },
     OntologyEntry {
         canonical: "origin_of_replication",
-        so: Some("SO:0000296"),
+        ontology: Some("SO:0000296"),
         css: "origin-of-replication",
         also: &["origin"],
+        slug: "origin-of-replication",
     },
     OntologyEntry {
         canonical: "operator",
-        so: Some("SO:0000057"),
+        ontology: Some("SO:0000057"),
         css: "operator",
         also: &[],
+        slug: "operator",
     },
     OntologyEntry {
         canonical: "deletion",
-        so: Some("SO:0000159"),
+        ontology: Some("SO:0000159"),
         css: "protein-stability-element",
         also: &[],
+        slug: "protein-stability-element",
     },
     OntologyEntry {
         canonical: "polya_site",
-        so: Some("SO:0000553"),
+        ontology: Some("SO:0000553"),
         css: "poly-a-site",
         also: &["polya"],
+        slug: "poly-a-site",
     },
     OntologyEntry {
         canonical: "composite",
-        so: None,
+        ontology: None,
         css: "composite",
         also: &["biobrick", "composite part"],
+        slug: "composite",
     },
     OntologyEntry {
         canonical: "plasmid_backbone",
-        so: None,
+        ontology: None,
         css: "plasmid-backbone",
         also: &["plasmid backbone", "backbone"],
+        slug: "plasmid-backbone",
     },
     OntologyEntry {
         canonical: "plasmid",
-        so: Some("SO:0000155"),
+        ontology: Some("SO:0000155"),
         css: "plasmid",
         also: &["vector", "complete plasmid", "plasmid sequence"],
+        slug: "plasmid",
     },
 ];
 
