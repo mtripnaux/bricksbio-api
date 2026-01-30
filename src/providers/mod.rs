@@ -1,6 +1,7 @@
 pub mod synbiohub;
 pub mod igem_parts;
 pub mod ncbi;
+pub mod igem_registry;
 
 use crate::types::Biobrick;
 
@@ -13,8 +14,9 @@ pub trait Provider: Send + Sync {
 
 pub fn get_all_providers() -> Vec<Box<dyn Provider>> {
     vec![
-        Box::new(igem_parts::IgemPartsProvider),
+        Box::new(igem_registry::IgemApiProvider),
         Box::new(synbiohub::SynBioHubProvider),
+        Box::new(igem_parts::IgemPartsProvider),
         Box::new(ncbi::NcbiProvider),
     ]
 }

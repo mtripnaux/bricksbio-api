@@ -1,13 +1,13 @@
 use crate::providers::Provider;
 use crate::types::{Biobrick, MetaBiobrick, MetaFeature, MetaProvider, Location, Author};
-use crate::ontology::multiple_type_inference;
+use crate::ontology::{multiple_type_inference_entry, OntologyEntrySerializable};
 use scraper::{Html, Selector};
 
 pub struct IgemPartsProvider;
 
 impl Provider for IgemPartsProvider {
     fn name(&self) -> &'static str {
-        "iGEM Parts Registry (Legacy)"
+        "iGEM Parts (Legacy)"
     }
     
     fn link(&self, id: &str) -> String {
@@ -20,58 +20,68 @@ impl Provider for IgemPartsProvider {
     
     fn parse(&self, id: &str, html_text: &str) -> Option<Biobrick> {
         println!("    Parsing iGEM Parts HTML, length: {}", html_text.len());
-        
-        let document = Html::parse_document(html_text);
-        
-        let description = if let Ok(selector) = Selector::parse("span#part_desc") {
-            document.select(&selector)
-                .next()
-                .map(|el| el.text().collect::<String>().trim().to_string())
-                .unwrap_or_default()
-        } else {
-            String::new()
-        };
-        
-        let name = if !description.is_empty() {
-            description.clone()
-        } else {
-            id.to_string()
-        };
-        
-        println!("    Found functional name: {}", name);
-        
-        let edit_html = match fetch_edit_page(id) {
-            Ok(html) => html,
-            Err(e) => {
-                println!("    Error fetching edit page: {}", e);
-                return None;
-            }
-        };
-        
-        let edit_doc = Html::parse_document(&edit_html);
-        
+
+        // 1. Parse the edit page (features, sequence, authors)
+        let edit_doc = Html::parse_document(html_text);
         let sequence = extract_sequence_from_edit(&edit_doc);
         if sequence.is_empty() {
             println!("    No sequence found in edit page, aborting");
             return None;
         }
         println!("    Got sequence: {} bp", sequence.len());
-        
         let features = extract_features_from_edit(&edit_doc);
         println!("    Found {} features", features.len());
-        
         let mut authors = extract_authors_from_edit(&edit_doc);
+
+        // 2. Fetch the public part page for title/description
+        let part_url = format!("https://parts.igem.org/Part:{}", id);
+        let part_html = match ureq::get(&part_url)
+            .set("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            .timeout(std::time::Duration::from_secs(10))
+            .call()
+            .into_string() {
+            Ok(html) => html,
+            Err(e) => {
+                println!("    Error fetching part page: {}", e);
+                String::new()
+            }
+        };
+        let part_doc = Html::parse_document(&part_html);
+
+        // Extract description from part page (span#part_desc)
+        let description = if let Ok(selector) = Selector::parse("span#part_desc") {
+            part_doc.select(&selector)
+                .next()
+                .map(|el| el.text().collect::<String>().trim().to_string())
+                .unwrap_or_default()
+        } else {
+            String::new()
+        };
+
+        // Extract title from <title> or fallback to id
+        let name = if let Ok(selector) = Selector::parse("title") {
+            part_doc.select(&selector)
+                .next()
+                .map(|el| el.text().collect::<String>().trim().to_string())
+                .filter(|t| !t.is_empty())
+                .unwrap_or_else(|| id.to_string())
+        } else {
+            id.to_string()
+        };
+
+        // Fallback: if no authors in edit page, try public page
         if authors.is_empty() {
-            authors = extract_authors(&document);
+            authors = extract_authors(&part_doc);
         }
-        
-        let part_type = extract_part_type(&document).unwrap_or_else(|| "unknown".to_string());
-        
+
+        // Extract part type from public page
+        let part_type = extract_part_type(&part_doc).unwrap_or_else(|| "unknown".to_string());
+
         Some(Biobrick {
             metadata: MetaBiobrick {
                 id: id.to_string(),
                 name,
-                r#type: multiple_type_inference(&[part_type.clone(), description.clone()]).into(),
+                r#type: OntologyEntrySerializable::from(multiple_type_inference_entry(&[part_type.clone(), description.clone()])),
                 circular: false,
                 size: sequence.len() as i32,
                 providers: vec![MetaProvider {
@@ -136,7 +146,7 @@ fn extract_features_from_edit(document: &Html) -> Vec<MetaFeature> {
                 features.push(MetaFeature {
                     id: format!("igem_{}", id),
                     name: if label.is_empty() { kind.clone() } else { label },
-                    r#type: multiple_type_inference(&[kind.clone()]).into(),
+                    r#type: OntologyEntrySerializable::from(multiple_type_inference_entry(&[kind.clone()])),
                     location: Location {
                         start,
                         end,

@@ -1,1 +1,6 @@
 /target
+*lock*
+*log*
+.vscode/
+.idea/
+/bench

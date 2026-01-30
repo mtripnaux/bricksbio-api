@@ -1,9 +1,9 @@
 mod merge;
 mod ontology;
 mod types;
-mod parser;
 mod search;
 mod providers;
+mod parsers;
 
 use axum::{
     extract::Path,

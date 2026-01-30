@@ -1,6 +1,6 @@
 use crate::providers::Provider;
 use crate::types::Biobrick;
-use crate::parser::{parse_genbank_raw, genbank_to_biobrick};
+use crate::parsers::genbank::{parse_genbank_raw, genbank_to_biobrick};
 
 pub struct SynBioHubProvider;
 

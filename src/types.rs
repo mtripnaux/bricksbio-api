@@ -20,7 +20,7 @@ pub struct Location {
 pub struct MetaFeature {
     pub id: String,
     pub name: String,
-    pub r#type: String, // SBOLType
+    pub r#type: crate::ontology::OntologyEntrySerializable,
     pub location: Location,
 }
 
@@ -31,10 +31,11 @@ pub struct MetaProvider {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(crate = "serde")]
 pub struct MetaBiobrick {
     pub id: String,
     pub name: String,
-    pub r#type: String, // SBOLType
+    pub r#type: crate::ontology::OntologyEntrySerializable,
     pub circular: bool,
     pub size: i32,
     pub providers: Vec<MetaProvider>,

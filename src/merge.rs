@@ -21,9 +21,9 @@ pub fn enrich(biobrick1: Biobrick, biobrick2: Biobrick) -> Biobrick {
             id: biobrick1.metadata.id.clone(),
             name: merge_strings(&biobrick1.metadata.name, &biobrick2.metadata.name),
             r#type: multiple_type_inference(&[
-                biobrick1.metadata.r#type.clone(),
-                biobrick2.metadata.r#type.clone(),
-            ]),
+                biobrick1.metadata.r#type.canonical.clone(),
+                biobrick2.metadata.r#type.canonical.clone(),
+            ]).into(),
             size: biobrick1.metadata.size,
             circular: biobrick1.metadata.circular || biobrick2.metadata.circular,
             providers: concat_unique_providers(
@@ -81,7 +81,7 @@ pub fn merge_features(f1: MetaFeature, f2: MetaFeature) -> MetaFeature {
     MetaFeature {
         name: merge_strings(&f1.name, &f2.name),
         id: f1.id,
-        r#type: multiple_type_inference(&[f1.r#type, f2.r#type]),
+        r#type: multiple_type_inference(&[f1.r#type.canonical.clone(), f2.r#type.canonical.clone()]).into(),
         location: f1.location,
     }
 }
