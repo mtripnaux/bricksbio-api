@@ -3,6 +3,5 @@
 *log*
 .vscode/
 .idea/
-/bench
 /samples/*
 /cache/*
