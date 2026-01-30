@@ -26,7 +26,7 @@ pub async fn meta_search(id: &str) -> Option<Biobrick> {
                 Ok(response) => {
                     if response.status().is_success() {
                         let text = response.text().await.unwrap_or_default();
-                        let parsed = provider.parse(id, &text);
+                        let parsed = provider.parse(id, &text).await;
                         return parsed;
                     } else {
                         println!("    Failed with status: {}", response.status());

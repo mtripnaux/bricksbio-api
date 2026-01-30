@@ -1,11 +1,12 @@
-use crate::providers::Provider;
+use async_trait::async_trait;
 use crate::types::{Biobrick, MetaBiobrick, MetaFeature, MetaProvider, Location, Author};
 use crate::ontology::multiple_type_inference;
 use scraper::{Html, Selector};
 
 pub struct IgemPartsProvider;
 
-impl Provider for IgemPartsProvider {
+#[async_trait]
+impl super::ProviderEnumTrait for IgemPartsProvider {
     fn name(&self) -> &'static str {
         "iGEM Parts Registry (Legacy)"
     }
@@ -18,7 +19,7 @@ impl Provider for IgemPartsProvider {
         self.link(id)
     }
     
-    fn parse(&self, id: &str, html_text: &str) -> Option<Biobrick> {
+    async fn parse(&self, id: &str, html_text: &str) -> Option<Biobrick> {
         println!("    Parsing iGEM Parts HTML, length: {}", html_text.len());
         
         let document = Html::parse_document(html_text);

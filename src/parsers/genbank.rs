@@ -46,7 +46,22 @@ pub fn parse_genbank_raw(text: &str) -> Option<GenBankData> {
             }
             if parts.len() >= 6 {
                 let date_str = parts[parts.len()-1];
-                if let Ok(parsed) = chrono::NaiveDate::parse_from_str(date_str, "%d-%b-%Y") {
+                let normalized_date = if date_str.contains('-') {
+                    let d_parts: Vec<&str> = date_str.split('-').collect();
+                    if d_parts.len() == 3 {
+                        let mut month = d_parts[1].to_lowercase();
+                        if let Some(first) = month.get_mut(0..1) {
+                            first.make_ascii_uppercase();
+                        }
+                        format!("{}-{}-{}", d_parts[0], month, d_parts[2])
+                    } else {
+                        date_str.to_string()
+                    }
+                } else {
+                    date_str.to_string()
+                };
+
+                if let Ok(parsed) = chrono::NaiveDate::parse_from_str(&normalized_date, "%d-%b-%Y") {
                     creation = Some(parsed.format("%Y-%m-%dT00:00:00.000Z").to_string());
                 }
             }

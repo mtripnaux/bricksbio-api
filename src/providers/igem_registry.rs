@@ -1,4 +1,4 @@
-use crate::providers::Provider;
+use async_trait::async_trait;
 use crate::types::{Biobrick, MetaBiobrick, MetaProvider, Author};
 use crate::ontology::multiple_type_inference;
 use serde::Deserialize;
@@ -9,7 +9,8 @@ fn slugify(id: &str) -> String {
     id.trim().to_lowercase().replace('_', "-")
 }
 
-impl Provider for IgemApiProvider {
+#[async_trait]
+impl super::ProviderEnumTrait for IgemApiProvider {
     fn name(&self) -> &'static str {
         "iGEM Registry"
     }
@@ -22,7 +23,7 @@ impl Provider for IgemApiProvider {
         format!("https://api.registry.igem.org/v1/parts/slugs/{}", slugify(id))
     }
 
-    fn parse(&self, id: &str, json_text: &str) -> Option<Biobrick> {
+    async fn parse(&self, id: &str, json_text: &str) -> Option<Biobrick> {
         let api_part: ApiPart = serde_json::from_str(json_text).ok()?;
         let sequence = api_part.sequence.clone().unwrap_or_default().to_lowercase();
         if sequence.is_empty() { return None; }
