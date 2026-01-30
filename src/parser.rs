@@ -1,0 +1,180 @@
+use crate::types::{Biobrick, MetaBiobrick, MetaFeature, MetaProvider, Location, Author};
+use crate::ontology::multiple_type_inference;
+
+#[derive(Debug, Clone)]
+pub struct GenBankData {
+    pub name: String,
+    pub definition: String,
+    pub sequence: String,
+    pub circular: bool,
+    pub features: Vec<GenBankFeature>,
+}
+
+#[derive(Debug, Clone)]
+pub struct GenBankFeature {
+    pub kind: String,
+    pub start: i32,
+    pub end: i32,
+    pub strand: i32,
+    pub qualifiers: Vec<(String, String)>,
+}
+
+pub fn parse_genbank_raw(text: &str) -> Option<GenBankData> {
+    println!("    Parsing GenBank, text length: {}", text.len());
+    
+    let lines: Vec<&str> = text.lines().collect();
+    if lines.is_empty() {
+        return None;
+    }
+    
+    let mut name = String::new();
+    let mut definition = String::new();
+    let mut sequence = String::new();
+    let mut circular = false;
+    let mut features = Vec::new();
+    let mut in_features = false;
+    let mut in_origin = false;
+    
+    for line in lines {
+        let trimmed = line.trim();
+        
+        if line.starts_with("LOCUS") {
+            // LOCUS       BBa_B0034                 12 bp    DNA     linear
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            if parts.len() >= 2 {
+                name = parts[1].to_string();
+            }
+            if line.contains("circular") {
+                circular = true;
+            }
+        } else if line.starts_with("DEFINITION") {
+            definition = line["DEFINITION".len()..].trim().to_string();
+        } else if line.starts_with("FEATURES") {
+            in_features = true;
+            in_origin = false;
+        } else if line.starts_with("ORIGIN") {
+            in_features = false;
+            in_origin = true;
+        } else if line.starts_with("//") {
+            break;
+        } else if in_features && line.starts_with("     ") && !line.starts_with("                     ") {
+            let feature_line = line.trim();
+            if let Some(space_idx) = feature_line.find(char::is_whitespace) {
+                let kind = feature_line[..space_idx].to_string();
+                let location = feature_line[space_idx..].trim();
+                
+                if let Some((start, end, strand)) = parse_location(location) {
+                    features.push(GenBankFeature {
+                        kind,
+                        start,
+                        end,
+                        strand,
+                        qualifiers: Vec::new(),
+                    });
+                }
+            }
+        } else if in_features && line.starts_with("                     /") {
+            if let Some(last_feature) = features.last_mut() {
+                let qualifier = line.trim();
+                if qualifier.starts_with('/') {
+                    if let Some(eq_idx) = qualifier.find('=') {
+                        let key = qualifier[1..eq_idx].to_string();
+                        let value = qualifier[eq_idx + 1..].trim_matches('"').to_string();
+                        last_feature.qualifiers.push((key, value));
+                    }
+                }
+            }
+        } else if in_origin && !trimmed.is_empty() {
+            let seq_part: String = trimmed.chars()
+                .filter(|c| c.is_alphabetic())
+                .collect();
+            sequence.push_str(&seq_part);
+        }
+    }
+    
+    if name.is_empty() && sequence.is_empty() {
+        println!("Failed to parse: no name or sequence found");
+        return None;
+    }
+    
+    Some(GenBankData {
+        name,
+        definition,
+        sequence,
+        circular,
+        features,
+    })
+}
+
+fn parse_location(loc: &str) -> Option<(i32, i32, i32)> {
+    let loc = loc.trim();
+    
+    if loc.starts_with("complement(") && loc.ends_with(')') {
+        let inner = &loc[11..loc.len() - 1];
+        return parse_location(inner).map(|(s, e, _)| (s, e, 2));
+    }
+    
+    if let Some(dot_idx) = loc.find("..") {
+        let start = loc[..dot_idx].parse::<i32>().ok()?;
+        let end = loc[dot_idx + 2..].parse::<i32>().ok()?;
+        return Some((start, end, 1));
+    }
+    
+    if let Ok(pos) = loc.parse::<i32>() {
+        return Some((pos, pos, 1));
+    }
+    
+    None
+}
+
+pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_data: GenBankData) -> Biobrick {
+    let size = gb_data.sequence.len() as i32;
+    
+    let features: Vec<MetaFeature> = gb_data.features.iter().map(|f| {
+        let name = f.qualifiers.iter()
+            .find(|(k, _)| k == "label" || k == "gene" || k == "note" || k == "locus_tag")
+            .map(|(_, v)| v.clone())
+            .unwrap_or_else(|| f.kind.clone());
+
+        MetaFeature {
+            id: format!("{}_{}", name, f.start),
+            name: name.clone(),
+            r#type: multiple_type_inference(&[name.clone(), f.kind.clone()]),
+            location: Location {
+                start: f.start,
+                end: f.end,
+                strand: f.strand,
+                forward: f.strand == 1,
+            },
+        }
+    }).collect();
+
+    let name = if gb_data.name.is_empty() {
+        id.to_string()
+    } else {
+        gb_data.name
+    };
+
+    Biobrick {
+        metadata: MetaBiobrick {
+            id: id.to_string(),
+            name,
+            r#type: multiple_type_inference(&[gb_data.definition.clone()]),
+            circular: gb_data.circular,
+            size,
+            providers: vec![MetaProvider {
+                name: provider.to_string(),
+                link: provider_link.to_string(),
+            }],
+            description: gb_data.definition,
+            features,
+        },
+        sequence: gb_data.sequence,
+        authors: vec![Author {
+            name: provider.to_string(),
+            orcid: None,
+            email: None,
+            affiliation: None,
+        }],
+    }
+}

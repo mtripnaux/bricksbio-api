@@ -1,0 +1,24 @@
+use crate::providers::Provider;
+use crate::types::Biobrick;
+use crate::parser::{parse_genbank_raw, genbank_to_biobrick};
+
+pub struct SynBioHubProvider;
+
+impl Provider for SynBioHubProvider {
+    fn name(&self) -> &'static str {
+        "SynBioHub-iGEM"
+    }
+    
+    fn link(&self, id: &str) -> String {
+        format!("https://synbiohub.org/public/igem/{}/1", id)
+    }
+    
+    fn url(&self, id: &str) -> String {
+        format!("https://synbiohub.org/public/igem/{}/1/gb", id)
+    }
+    
+    fn parse(&self, id: &str, text: &str) -> Option<Biobrick> {
+        parse_genbank_raw(text)
+            .map(|gb_data| genbank_to_biobrick(id, self.name(), &self.link(id), gb_data))
+    }
+}
