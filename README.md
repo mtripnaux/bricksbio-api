@@ -1,8 +1,8 @@
 ## Providers
 
- - `iGEM Parts Registry (Legacy)` is a HTML scraper, making 2 requests.
- - `iGEM Registry` is a single JSON request.
- - `iGEM via SynBioHub` is a SBOL and GB parser, making 2 requests.
+ - [`iGEM Parts Registry (Legacy)`](https://parts.igem.org/) is a HTML scraper, making 2 requests.
+ - [`iGEM Registry`](https://registry.igem.org) is a single JSON request.
+ - [`iGEM via SynBioHub`](https://synbiohub.org/public/igem/igem_collection/1) is a SBOL and GB parser, making 2 requests.
 
 ## Schema
 
