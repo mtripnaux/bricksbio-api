@@ -32,10 +32,11 @@ A simple test script is located in `bench/providers.sh`. It essentially makes va
 ## Providers
 
  - [`iGEM Parts Registry (Legacy)`](https://parts.igem.org/) is a HTML scraper, making 2 requests.
- - [`iGEM Registry`](https://registry.igem.org) is a single JSON request.
+ - [`iGEM Registry`](https://registry.igem.org) is a single JSON request. Small parts, very fast.
  - [`iGEM via SynBioHub`](https://synbiohub.org/public/igem/igem_collection/1) is a SBOL and GB parser, making 2 requests.
   - [`Ensembl`](https://www.ensembl.org) is a GB parser, making 1 request.
   - [`NCBI`](https://https://www.ncbi.nlm.nih.gov/) is a GB parser, making 1 request.
+  - [`AddGene`](https://www.addgene.org/) is a HTML scraper, making 2 requests.
 
 ## Schema
 
