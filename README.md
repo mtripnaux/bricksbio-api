@@ -13,6 +13,14 @@
   </p>
 </div>
 
+## Introduction
+
+Currently, the synthetic biology part repositories are disseminated, inconsistent and rarely maintained (see the [Providers](https://github.com/mtripnaux/bricksbio-api?tab=readme-ov-file#providers) section). Almost no programmatic interface exist for these databases, despite endpoints to download hand-written, incomplete or extremely heterogenous data. We provide a simple, [RESTful](https://restfulapi.net/) interface to centralize this field and help accelerate its evolution, especially through large-scale automation.
+
+In addition to that, different standards are co-existing for synbio data storage ([SBOL](https://sbolstandard.org/), [GenBank](https://www.ncbi.nlm.nih.gov/genbank/) and others) but none of them is actually efficient. It either includes relevant data for genomic studies, or provides insights about the authorship, or describes the sequence's features. We introduce the Biobrick JSON schema, in tribute to the (now retired) [BioBricks Foundation (WebArchive)](https://web.archive.org/web/20120503070441/https://biobricks.org/) notably behind the [BioBrick Assembly Standard](https://en.wikipedia.org/wiki/BioBrick).
+
+> The Biobrick.json format is not intended to replace SBOL, but to simplify the querying and parsing of synthetic biology data. Every file from the Bricks.bio API can be exported to SBOL at any time.
+
 ## Usage
 
 To use this API, you can directly request [bricks.bio](https://bricks.bio/). Since everything is parsed or scraped from online public resources, you can also self-host this API. However, your local version might be slower at first, due to the fact that we use [response caching](https://restfulapi.net/caching/) of biobricks files. The API request template is extremely simple, you can either ask for a single part using its unique ID (often given by the provider), or perform a meta-search trough all cached biobricks. If you wish to run on local, you will have to use a pre-caching script in order to use the search feature.
