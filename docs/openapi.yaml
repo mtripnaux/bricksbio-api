@@ -1,0 +1,166 @@
+openapi: 3.0.3
+info:
+  title: Bricks.bio API
+  description: Universal API for retrieving biological parts (biobricks) from multiple providers.
+  version: 0.1.0
+  licence: MIT
+  contact:
+    name: Matheo Tripnaux
+    email: https://matheo.tripnaux.com
+servers:
+  - url: https://bricks.bio
+    description: Production server
+paths:
+  /parts/{id}:
+    get:
+      summary: Get biobrick by ID
+      description: Searches for a part by ID across multiple providers (full list on GitHub) and returns enriched metadata, sequence, and features.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          example: BBa_B0034
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with Biobrick format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Biobrick'
+        '404':
+          description: Part not found
+components:
+  schemas:
+    Biobrick:
+      type: object
+      required:
+        - metadata
+        - sequence
+        - features
+      properties:
+        metadata:
+          $ref: '#/components/schemas/MetaBiobrick'
+        sequence:
+          type: string
+          description: The nucleotide sequence of the part.
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaFeature'
+    MetaBiobrick:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - creation
+        - size
+        - circular
+        - type
+        - authors
+        - providers
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        creation:
+          type: string
+          format: date-time
+          description: ISO 8601 creation date.
+        size:
+          type: integer
+        circular:
+          type: boolean
+        type:
+          $ref: '#/components/schemas/OntologyEntry'
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+        providers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetaProvider'
+    Author:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+          nullable: true
+    MetaProvider:
+      type: object
+      required:
+        - name
+        - link
+        - date
+      properties:
+        name:
+          type: string
+        link:
+          type: string
+        date:
+          type: string
+          format: date-time
+    MetaFeature:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - location
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          $ref: '#/components/schemas/OntologyEntry'
+        location:
+          $ref: '#/components/schemas/Location'
+    Location:
+      type: object
+      required:
+        - start
+        - end
+        - strand
+        - forward
+      properties:
+        start:
+          type: integer
+        end:
+          type: integer
+        strand:
+          type: integer
+          description: "Strand information (e.g., 1 or 2)."
+        forward:
+          type: boolean
+    OntologyEntry:
+      type: object
+      required:
+        - canonical
+        - css
+        - also
+        - slug
+      properties:
+        canonical:
+          type: string
+        ontology:
+          type: string
+          nullable: true
+        css:
+          type: string
+        also:
+          type: array
+          items:
+            type: string
+        slug:
+          type: string
