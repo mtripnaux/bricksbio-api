@@ -166,7 +166,6 @@ fn extract_features_from_edit(document: &Html) -> Vec<MetaFeature> {
                     location: Location {
                         start,
                         end,
-                        strand,
                         forward: strand == 1,
                     },
                 });

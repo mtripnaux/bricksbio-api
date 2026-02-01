@@ -152,7 +152,6 @@ pub fn genbank_to_biobrick(id: &str, provider: &str, provider_link: &str, gb_dat
             location: Location {
                 start: f.start,
                 end: f.end,
-                strand: f.strand,
                 forward: f.strand == 1,
             },
         }

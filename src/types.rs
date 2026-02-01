@@ -10,7 +10,6 @@ pub struct Author {
 pub struct Location {
     pub start: i32,
     pub end: i32,
-    pub strand: i32, // 1 | 2
     pub forward: bool,
 }
 

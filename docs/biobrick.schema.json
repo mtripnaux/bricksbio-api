@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Biobrick",
+  "description": "A biological part including metadata, sequence, and features.",
+  "type": "object",
+  "required": ["metadata", "sequence", "features"],
+  "properties": {
+    "metadata": {
+      "$ref": "#/definitions/MetaBiobrick"
+    },
+    "sequence": {
+      "type": "string",
+      "description": "The nucleotide sequence of the part."
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/MetaFeature"
+      }
+    }
+  },
+  "definitions": {
+    "MetaBiobrick": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "description",
+        "creation",
+        "size",
+        "circular",
+        "type",
+        "authors",
+        "providers"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "creation": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 creation date."
+        },
+        "size": { "type": "integer" },
+        "circular": { "type": "boolean" },
+        "type": { "$ref": "#/definitions/OntologyEntry" },
+        "authors": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Author" }
+        },
+        "providers": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/MetaProvider" }
+        }
+      }
+    },
+    "Author": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "role": { "type": ["string", "null"] }
+      }
+    },
+    "MetaProvider": {
+      "type": "object",
+      "required": ["name", "link", "date"],
+      "properties": {
+        "name": { "type": "string" },
+        "link": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" }
+      }
+    },
+    "MetaFeature": {
+      "type": "object",
+      "required": ["id", "name", "type", "location"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "$ref": "#/definitions/OntologyEntry" },
+        "location": { "$ref": "#/definitions/Location" }
+      }
+    },
+    "Location": {
+      "type": "object",
+      "required": ["start", "end", "forward"],
+      "properties": {
+        "start": { "type": "integer" },
+        "end": { "type": "integer" },
+        "forward": {
+          "type": "boolean",
+          "description": "Whether the feature is on the forward strand."
+        }
+      }
+    },
+    "OntologyEntry": {
+      "type": "object",
+      "required": ["canonical", "css", "also", "slug"],
+      "properties": {
+        "canonical": { "type": "string" },
+        "ontology": { "type": ["string", "null"] },
+        "css": { "type": "string" },
+        "also": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "slug": { "type": "string" }
+      }
+    }
+  }
+}

@@ -143,18 +143,15 @@ components:
       required:
         - start
         - end
-        - strand
         - forward
       properties:
         start:
           type: integer
         end:
           type: integer
-        strand:
-          type: integer
-          description: "Strand information (e.g., 1 or 2)."
         forward:
           type: boolean
+          description: "Whether the feature is on the forward strand."
     OntologyEntry:
       type: object
       required:
