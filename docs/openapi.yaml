@@ -35,6 +35,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /parts/{id}/sbol:
+    get:
+      summary: Get biobrick in SBOL
+      description: Searches for a part by ID and returns it in SBOL 2.0 (RDF/XML) format.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          example: BBa_B0034
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with SBOL XML
+          content:
+            application/rdf+xml:
+              schema:
+                type: string
+                format: xml
+        '404':
+          description: Part not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     Error:
