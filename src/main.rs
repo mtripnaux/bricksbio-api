@@ -11,6 +11,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use serde_json::json;
 use types::Biobrick;
 
 #[tokio::main]
@@ -22,16 +23,22 @@ async fn main() {
 }
 
 #[axum::debug_handler]
-async fn get_part(Path(id): Path<String>) -> Result<Json<Biobrick>, StatusCode> {
+async fn get_part(Path(id): Path<String>) -> Result<Json<Biobrick>, (StatusCode, Json<serde_json::Value>)> {
     let biobrick = search::meta_search(&id).await;
 
     match biobrick {
         Some(b) => {
             if b.metadata.size == 0 {
-                return Err(StatusCode::NOT_FOUND);
+                return Err((
+                    StatusCode::NOT_FOUND,
+                    Json(json!({ "message": "Part not found" })),
+                ));
             }
             Ok(Json(b))
         }
-        None => Err(StatusCode::NOT_FOUND),
+        None => Err((
+            StatusCode::NOT_FOUND,
+            Json(json!({ "message": "Part not found" })),
+        )),
     }
 }

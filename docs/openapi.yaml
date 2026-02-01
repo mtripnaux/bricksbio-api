@@ -31,8 +31,20 @@ paths:
                 $ref: '#/components/schemas/Biobrick'
         '404':
           description: Part not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          example: Part not found
     Biobrick:
       type: object
       required:
