@@ -39,7 +39,9 @@ A simple test script is located in `bench/providers.sh`. It essentially makes va
 
 ## Schema
 
- - `type` represents the type of a sequence.
+The full Biobrick [JSON Schema](https://json-schema.org/) can be found under `docs/biobrick.schema.json`.
+
+- `type` represents the type of a sequence.
     - `canonical` is a standardized custom format.
     - `ontology` is the [Sequence Ontology](http://sequenceontology.org/) identifier.
     - `css` is the type's class name in [SBOL Visual CSS](https://edinburgh-genome-foundry.github.io/SBOL-Visual-CSS/).
