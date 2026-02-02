@@ -6,7 +6,7 @@ info:
   licence: MIT
   contact:
     name: Matheo Tripnaux
-    email: https://matheo.tripnaux.com
+    url: https://matheo.tripnaux.com
 servers:
   - url: https://bricks.bio
     description: Production server
@@ -178,23 +178,4 @@ components:
           type: boolean
           description: "Whether the feature is on the forward strand."
     OntologyEntry:
-      type: object
-      required:
-        - canonical
-        - css
-        - also
-        - slug
-      properties:
-        canonical:
-          type: string
-        ontology:
-          type: string
-          nullable: true
-        css:
-          type: string
-        also:
-          type: array
-          items:
-            type: string
-        slug:
-          type: string
+
