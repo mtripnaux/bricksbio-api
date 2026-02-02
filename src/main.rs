@@ -13,6 +13,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use tower_http::services::ServeDir;
 use serde_json::json;
 use types::Biobrick;
 
@@ -21,6 +22,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(serve_redoc))
         .route("/openapi.yaml", get(serve_openapi))
+        .nest_service("/assets", ServeDir::new("assets"))
         .route("/parts/:id", get(get_part))
         .route("/parts/:id/sbol", get(get_part_sbol));
 

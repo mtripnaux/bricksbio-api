@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Bricks.bio Reference</title>
+    <title>Bricks.bio API</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
   </head>
@@ -35,9 +35,41 @@
         "orderRequiredPropertiesFirst": true,
         "_integration": "html",
         "default": false,
-        "slug": "api-1",
-        "title": "API #1"
-      }'>
+        "slug": "bricks-bio",
+        "title": "Bricks.bio",
+        "defaultHttpClient": {
+          "targetKey": "node",
+          "clientKey": "undici"
+        },
+        "documentDownloadType": "yaml",
+        "favicon": "/assets/favicon.ico",
+        "hiddenClients": {
+          "c": true,
+          "clojure": true,
+          "csharp": true,
+          "dart": true,
+          "fsharp": true,
+          "go": true,
+          "http": true,
+          "java": true,
+          "kotlin": true,
+          "node": true,
+          "objc": true,
+          "ocaml": true,
+          "php": true,
+          "ruby": true,
+          "rust": true,
+          "shell": ["httpie"],
+          "swift": true,
+          "powershell": true,
+          "js": ["axios", "jquery", "ofetch", "xhr"],
+          "python": ["httpx_async", "httpx_sync", "python3"]
+        },
+        "defaultHttpClient": {
+          "targetKey": "python",
+          "clientKey": "httpx_sync"
+        }
+    }'>
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>

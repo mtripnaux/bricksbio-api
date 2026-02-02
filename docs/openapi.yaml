@@ -1,12 +1,13 @@
 openapi: 3.0.3
 info:
   title: Bricks.bio API
-  description: Universal API for retrieving biological parts (biobricks) from multiple providers.
+  description: Universal API for retrieving biological parts from multiple providers. We provide a new standardized JSON schema (the Biobrick format). Our goal is to aggregate data to provide a fast, modern and unified tool to accelerate the field's evolution, especially towards iterative discovery and automation.
   version: 0.1.0
-  licence: MIT
+  licence: GPL-3.0+
   contact:
     name: Matheo Tripnaux
     url: https://matheo.tripnaux.com
+    email: matheo@tripnaux.com
 servers:
   - url: https://bricks.bio
     description: Production server
@@ -14,7 +15,7 @@ paths:
   /parts/{id}:
     get:
       summary: Get biobrick by ID
-      description: Searches for a part by ID across multiple providers (full list on GitHub) and returns enriched metadata, sequence, and features.
+      description: Searches for a part by ID across multiple providers (have a look at the full list on GitHub) and returns enriched metadata, sequence, and features.
       parameters:
         - name: id
           in: path
@@ -24,7 +25,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Successful response with Biobrick format
+          description: Successful response in Biobrick format
           content:
             application/json:
               schema:
@@ -38,7 +39,7 @@ paths:
   /parts/{id}/sbol:
     get:
       summary: Get biobrick in SBOL
-      description: Searches for a part by ID and returns it in SBOL 2.0 (RDF/XML) format.
+      description: Searches for a part by ID and returns enriched data in Synthetic Biology Open Language (SBOL v2.0) format. Note that not all Biobricks metadata may be represented in SBOL.
       parameters:
         - name: id
           in: path
@@ -48,7 +49,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Successful response with SBOL XML
+          description: Successful response in SBOL format
           content:
             application/rdf+xml:
               schema:
