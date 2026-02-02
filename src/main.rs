@@ -9,7 +9,7 @@ mod exporters;
 use axum::{
     extract::Path,
     http::{header, StatusCode},
-    response::IntoResponse,
+    response::{Html, IntoResponse},
     routing::get,
     Json, Router,
 };
@@ -19,11 +19,21 @@ use types::Biobrick;
 #[tokio::main]
 async fn main() {
     let app = Router::new()
+        .route("/", get(serve_redoc))
+        .route("/openapi.yaml", get(serve_openapi))
         .route("/parts/:id", get(get_part))
         .route("/parts/:id/sbol", get(get_part_sbol));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
+}
+
+async fn serve_redoc() -> Html<&'static str> {
+    Html(include_str!("../docs/index.html"))
+}
+
+async fn serve_openapi() -> impl IntoResponse {
+    ([(header::CONTENT_TYPE, "text/yaml")], include_str!("../docs/openapi.yaml"))
 }
 
 #[axum::debug_handler]
