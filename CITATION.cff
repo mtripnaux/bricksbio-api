@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Tripnaux"
+  given-names: "Matheo"
+  orcid: "https://orcid.org/0009-0005-5461-6382"
+title: "Bricks.bio API"
+version: 0.1.0
+date-released: 2026-02-01
+url: "https://github.com/mtripnaux/bricksbio-api"
