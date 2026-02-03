@@ -25,6 +25,10 @@ In addition to that, different standards are co-existing for synbio data storage
 
 To use this API, you can directly request [bricks.bio](https://bricks.bio/). Since everything is parsed or scraped from online public resources, you can also self-host this API. However, your local version might be slower at first, due to the fact that we use [response caching](https://restfulapi.net/caching/) of biobricks files. The API request template is extremely simple, you can either ask for a single part using its unique ID (often given by the provider), or perform a meta-search trough all cached biobricks. If you wish to run on local, you will have to use a pre-caching script in order to use the search feature.
 
+## Documentation
+
+You can read the [OpenAPI](https://www.openapis.org/) specification under `docs/openapi.yaml`, or read the HTML-rendered version directly on [bricks.bio](https://bricks.bio). A testing feature is available, with examples usage scripts from different popular languages and frameworks, thanks to [Scalar](https://scalar.com). Please be sure to select "variables" and "body" filter for readability, as no headers or cookies are used.
+
 ## Testing
 
 A simple test script is located in `bench/providers.sh`. It essentially makes various queries for part IDs located on different providers, and outputs a table including the ID, the [response status](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status) and the response time in miliseconds.
@@ -35,7 +39,7 @@ A simple test script is located in `bench/providers.sh`. It essentially makes va
  - [`iGEM Registry`](https://registry.igem.org) is a single JSON request. Small parts, very fast.
  - [`iGEM via SynBioHub`](https://synbiohub.org/public/igem/igem_collection/1) is a SBOL and GB parser, making 2 requests.
   - [`Ensembl`](https://www.ensembl.org) is a GB parser, making 1 request.
-  - [`NCBI`](https://https://www.ncbi.nlm.nih.gov/) is a GB parser, making 1 request.
+  - [`NCBI`](https://www.ncbi.nlm.nih.gov/) is a GB parser, making 1 request.
   - [`AddGene`](https://www.addgene.org/) is a HTML scraper, making 2 requests.
 
 ## Schema
