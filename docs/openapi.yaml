@@ -1,7 +1,18 @@
 openapi: 3.0.3
 info:
   title: Bricks.bio API
-  description: Universal API for retrieving biological parts from multiple providers. We provide a new standardized JSON schema (the Biobrick format). Our goal is to aggregate data to provide a fast, modern and unified tool to accelerate the field's evolution, especially towards iterative discovery and automation.
+  description: |
+    Universal API for retrieving biological parts from multiple providers. 
+    We provide a new standardized JSON schema (called biobrick). 
+    Our goal is to aggregate data to provide a modern and unified tool to accelerate synthetic biology evolution, especially towards iterative discovery and automation.
+    ## Providers
+
+    - [`iGEM Parts Registry (Legacy)`](https://parts.igem.org/) is a HTML scraper.
+    - [`iGEM Registry`](https://registry.igem.org) is a refactor from a single JSON request.
+    - [`iGEM via SynBioHub`](https://synbiohub.org/public/igem/igem_collection/1) is a SBOL and GenBank parser.
+    - [`Ensembl`](https://www.ensembl.org) is a GenBank parser.
+    - [`NCBI`](https://www.ncbi.nlm.nih.gov/) is a GenBank parser.
+    - [`AddGene`](https://www.addgene.org/) is a HTML scraper.
   version: 0.1.0
   licence: GPL-3.0+
   contact:
