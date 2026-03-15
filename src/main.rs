@@ -1,3 +1,4 @@
+mod cache;
 mod merge;
 mod ontology;
 mod types;
@@ -7,24 +8,46 @@ mod parsers;
 mod exporters;
 
 use axum::{
-    extract::Path,
+    extract::{Path, State},
     http::{header, StatusCode},
     response::{Html, IntoResponse},
     routing::get,
     Json, Router,
 };
+use std::{collections::HashSet, sync::Arc};
 use tower_http::services::ServeDir;
 use serde_json::json;
 use types::Biobrick;
 
+#[derive(Clone)]
+pub struct AppState {
+    pub client: reqwest::Client,
+    pub cache: cache::SqliteCache,
+    pub refresh_in_flight: Arc<tokio::sync::Mutex<HashSet<String>>>,
+}
+
 #[tokio::main]
 async fn main() {
+    let client = reqwest::Client::builder()
+        .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        .timeout(std::time::Duration::from_secs(10))
+        .build()
+        .unwrap();
+
+    let cache = cache::SqliteCache::new("cache/bricksbio.db").unwrap();
+    let state = AppState {
+        client,
+        cache,
+        refresh_in_flight: Arc::new(tokio::sync::Mutex::new(HashSet::new())),
+    };
+
     let app = Router::new()
         .route("/", get(serve_redoc))
         .route("/openapi.yaml", get(serve_openapi))
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/parts/:id", get(get_part))
-        .route("/parts/:id/sbol", get(get_part_sbol));
+        .route("/parts/:id/sbol", get(get_part_sbol))
+        .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
@@ -39,8 +62,11 @@ async fn serve_openapi() -> impl IntoResponse {
 }
 
 #[axum::debug_handler]
-async fn get_part(Path(id): Path<String>) -> Result<Json<Biobrick>, (StatusCode, Json<serde_json::Value>)> {
-    let biobrick = search::meta_search(&id).await;
+async fn get_part(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<Biobrick>, (StatusCode, Json<serde_json::Value>)> {
+    let biobrick = search::meta_search(&state, &id).await;
 
     match biobrick {
         Some(b) => {
@@ -60,8 +86,11 @@ async fn get_part(Path(id): Path<String>) -> Result<Json<Biobrick>, (StatusCode,
 }
 
 #[axum::debug_handler]
-async fn get_part_sbol(Path(id): Path<String>) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
-    let biobrick = search::meta_search(&id).await;
+async fn get_part_sbol(
+    State(state): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<impl IntoResponse, (StatusCode, Json<serde_json::Value>)> {
+    let biobrick = search::meta_search(&state, &id).await;
 
     match biobrick {
         Some(b) => {

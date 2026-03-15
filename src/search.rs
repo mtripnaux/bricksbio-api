@@ -1,16 +1,53 @@
 use futures::future::join_all;
+
+use crate::AppState;
 use crate::types::Biobrick;
 use crate::providers::get_all_providers;
 
-pub async fn meta_search(id: &str) -> Option<Biobrick> {
+pub async fn meta_search(state: &AppState, id: &str) -> Option<Biobrick> {
+    let id_normalized = normalize_id(id);
+
+    if let Some(cached) = state.cache.get_part(&id_normalized) {
+        spawn_refresh(state.clone(), id.to_string(), id_normalized).await;
+        return Some(cached);
+    }
+
+    let fetched = fetch_and_merge(&state.client, id).await;
+
+    if let Some(ref biobrick) = fetched {
+        if let Err(error) = state.cache.put_part(&normalize_id(id), biobrick) {
+            eprintln!("Failed to persist cache entry for {}: {}", id, error);
+        }
+    }
+
+    fetched
+}
+
+async fn spawn_refresh(state: AppState, id: String, id_normalized: String) {
+    let mut refresh_in_flight = state.refresh_in_flight.lock().await;
+    if !refresh_in_flight.insert(id_normalized.clone()) {
+        return;
+    }
+    drop(refresh_in_flight);
+
+    tokio::spawn(async move {
+        let refresh_result = fetch_and_merge(&state.client, &id).await;
+
+        if let Some(ref biobrick) = refresh_result {
+            if let Err(error) = state.cache.put_part(&id_normalized, biobrick) {
+                eprintln!("Failed to refresh cache entry for {}: {}", id, error);
+            }
+        }
+
+        let mut refresh_in_flight = state.refresh_in_flight.lock().await;
+        refresh_in_flight.remove(&id_normalized);
+    });
+}
+
+async fn fetch_and_merge(client: &reqwest::Client, id: &str) -> Option<Biobrick> {
     println!("Searching for part: {}", id);
     
     let providers = get_all_providers();
-    let client = reqwest::Client::builder()
-        .user_agent("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-        .timeout(std::time::Duration::from_secs(10))
-        .build()
-        .unwrap();
     
     let mut futures = Vec::new();
 
@@ -59,4 +96,8 @@ pub async fn meta_search(id: &str) -> Option<Biobrick> {
     }
 
     Some(final_biobrick)
+}
+
+fn normalize_id(id: &str) -> String {
+    id.trim().to_lowercase()
 }
