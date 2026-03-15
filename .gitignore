@@ -5,3 +5,4 @@
 .idea/
 /samples/*
 /cache/*
+.fastembed_cache/*

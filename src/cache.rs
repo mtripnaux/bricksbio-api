@@ -82,4 +82,17 @@ impl SqliteCache {
             |row| row.get(0),
         )
     }
+
+    pub fn list_parts(&self) -> Result<Vec<Biobrick>, rusqlite::Error> {
+        let connection = self.connection.lock().unwrap();
+        let mut statement = connection.prepare("SELECT biobrick_json FROM parts_cache")?;
+        let rows = statement.query_map([], |row| row.get::<_, String>(0))?;
+
+        let parts = rows
+            .filter_map(|r| r.ok())
+            .filter_map(|json| serde_json::from_str::<Biobrick>(&json).ok())
+            .collect::<Vec<_>>();
+
+        Ok(parts)
+    }
 }

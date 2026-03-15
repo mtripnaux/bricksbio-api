@@ -72,8 +72,106 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /cache/search:
+    get:
+      summary: Search cached biobricks
+      description: Performs semantic search over the locally cached biobricks and returns the most relevant matches.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query string.
+          example: insulin promoter
+          schema:
+            type: string
+        - name: n
+          in: query
+          required: false
+          description: Maximum number of results to return. Values above 50 are capped to 50.
+          example: 10
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+      responses:
+        '200':
+          description: Ranked cached results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Search'
+        '400':
+          description: Missing or empty query parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Cache search failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /cache/stats:
+    get:
+      summary: Get cache statistics
+      description: Returns the number of biobrick entries currently stored in the local cache.
+      responses:
+        '200':
+          description: Current cache statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheStats'
+        '500':
+          description: Cache statistics could not be read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
+    CacheStats:
+      type: object
+      required:
+        - entries
+      properties:
+        entries:
+          type: integer
+          example: 42
+    Search:
+      type: object
+      required:
+        - query
+        - requested
+        - count
+        - results
+      properties:
+        query:
+          type: string
+          example: insulin promoter
+        requested:
+          type: integer
+          example: 10
+        count:
+          type: integer
+          example: 3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Hit'
+    Hit:
+      type: object
+      required:
+        - match
+        - biobrick
+      properties:
+        match:
+          type: number
+          format: double
+          example: 0.8731
+        biobrick:
+          $ref: '#/components/schemas/Biobrick'
     Error:
       type: object
       required:

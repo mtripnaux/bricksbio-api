@@ -3,6 +3,7 @@ mod merge;
 mod ontology;
 mod types;
 mod search;
+mod semantic;
 mod providers;
 mod parsers;
 mod exporters;
@@ -15,21 +16,16 @@ use axum::{
     Json, Router,
 };
 use std::{collections::HashSet, sync::Arc};
+use axum::extract::Query;
 use tower_http::services::ServeDir;
-use serde::Serialize;
 use serde_json::json;
-use types::Biobrick;
+use types::{Biobrick, CacheSearchParams, CacheStats, SearchHit, SearchResponse};
 
 #[derive(Clone)]
 pub struct AppState {
     pub client: reqwest::Client,
     pub cache: cache::SqliteCache,
     pub refresh_in_flight: Arc<tokio::sync::Mutex<HashSet<String>>>,
-}
-
-#[derive(Serialize)]
-struct CacheStatsResponse {
-    entries: i64,
 }
 
 #[tokio::main]
@@ -51,6 +47,7 @@ async fn main() {
         .route("/", get(serve_redoc))
         .route("/openapi.yaml", get(serve_openapi))
         .route("/cache/stats", get(get_cache_stats))
+        .route("/cache/search", get(get_cache_search))
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/parts/:id", get(get_part))
         .route("/parts/:id/sbol", get(get_part_sbol))
@@ -71,12 +68,51 @@ async fn serve_openapi() -> impl IntoResponse {
 #[axum::debug_handler]
 async fn get_cache_stats(
     State(state): State<AppState>,
-) -> Result<Json<CacheStatsResponse>, (StatusCode, Json<serde_json::Value>)> {
+) -> Result<Json<CacheStats>, (StatusCode, Json<serde_json::Value>)> {
     match state.cache.stats_entries() {
-        Ok(entries) => Ok(Json(CacheStatsResponse { entries })),
+        Ok(entries) => Ok(Json(CacheStats { entries })),
         Err(error) => Err((
             StatusCode::INTERNAL_SERVER_ERROR,
             Json(json!({ "message": format!("Failed to read cache stats: {}", error) })),
+        )),
+    }
+}
+
+#[axum::debug_handler]
+async fn get_cache_search(
+    State(state): State<AppState>,
+    Query(params): Query<CacheSearchParams>,
+) -> Result<Json<SearchResponse>, (StatusCode, Json<serde_json::Value>)> {
+    let query = params.q.trim().to_string();
+    if query.is_empty() {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            Json(json!({ "message": "Missing or empty query parameter: q" })),
+        ));
+    }
+
+    let requested = params.n.unwrap_or(10).min(50);
+
+    match semantic::cache_search(&state.cache, &query, requested) {
+        Ok(items) => {
+            let results = items
+                .into_iter()
+                .map(|(biobrick, score)| SearchHit {
+                    r#match: score,
+                    biobrick,
+                })
+                .collect::<Vec<_>>();
+
+            Ok(Json(SearchResponse {
+                query,
+                requested,
+                count: results.len(),
+                results,
+            }))
+        }
+        Err(error) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "message": format!("Failed to search cache: {}", error) })),
         )),
     }
 }

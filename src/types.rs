@@ -48,3 +48,28 @@ pub struct Biobrick {
     pub sequence: String,
     pub features: Vec<MetaFeature>,
 }
+
+#[derive(Debug, Serialize)]
+pub struct CacheStats {
+    pub entries: i64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CacheSearchParams {
+    pub q: String,
+    pub n: Option<usize>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SearchHit {
+    pub r#match: f64,
+    pub biobrick: Biobrick,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SearchResponse {
+    pub query: String,
+    pub requested: usize,
+    pub count: usize,
+    pub results: Vec<SearchHit>,
+}
