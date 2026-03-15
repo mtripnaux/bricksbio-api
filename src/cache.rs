@@ -73,4 +73,13 @@ impl SqliteCache {
         )?;
         Ok(())
     }
+
+    pub fn stats_entries(&self) -> Result<i64, rusqlite::Error> {
+        let connection = self.connection.lock().unwrap();
+        connection.query_row(
+            "SELECT COUNT(*) FROM parts_cache",
+            [],
+            |row| row.get(0),
+        )
+    }
 }

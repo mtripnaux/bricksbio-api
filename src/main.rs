@@ -16,6 +16,7 @@ use axum::{
 };
 use std::{collections::HashSet, sync::Arc};
 use tower_http::services::ServeDir;
+use serde::Serialize;
 use serde_json::json;
 use types::Biobrick;
 
@@ -24,6 +25,11 @@ pub struct AppState {
     pub client: reqwest::Client,
     pub cache: cache::SqliteCache,
     pub refresh_in_flight: Arc<tokio::sync::Mutex<HashSet<String>>>,
+}
+
+#[derive(Serialize)]
+struct CacheStatsResponse {
+    entries: i64,
 }
 
 #[tokio::main]
@@ -44,6 +50,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(serve_redoc))
         .route("/openapi.yaml", get(serve_openapi))
+        .route("/cache/stats", get(get_cache_stats))
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/parts/:id", get(get_part))
         .route("/parts/:id/sbol", get(get_part_sbol))
@@ -59,6 +66,19 @@ async fn serve_redoc() -> Html<&'static str> {
 
 async fn serve_openapi() -> impl IntoResponse {
     ([(header::CONTENT_TYPE, "text/yaml")], include_str!("../docs/openapi.yaml"))
+}
+
+#[axum::debug_handler]
+async fn get_cache_stats(
+    State(state): State<AppState>,
+) -> Result<Json<CacheStatsResponse>, (StatusCode, Json<serde_json::Value>)> {
+    match state.cache.stats_entries() {
+        Ok(entries) => Ok(Json(CacheStatsResponse { entries })),
+        Err(error) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(json!({ "message": format!("Failed to read cache stats: {}", error) })),
+        )),
+    }
 }
 
 #[axum::debug_handler]
