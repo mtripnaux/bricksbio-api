@@ -126,7 +126,7 @@ components:
         circular:
           type: boolean
         type:
-          $ref: '#/components/schemas/OntologyEntry'
+          $ref: '#/components/schemas/Type'
         authors:
           type: array
           items:
@@ -172,7 +172,7 @@ components:
         name:
           type: string
         type:
-          $ref: '#/components/schemas/OntologyEntry'
+          $ref: '#/components/schemas/Type'
         location:
           $ref: '#/components/schemas/Location'
     Location:
@@ -189,5 +189,33 @@ components:
         forward:
           type: boolean
           description: "Whether the feature is on the forward strand."
-    OntologyEntry:
+    Type:
+
+        type: object
+        description: Represents the type of a sequence.
+        required:
+          - canonical
+          - css
+          - also
+          - slug
+        properties:
+          canonical:
+            type: string
+            description: Standardized custom format.
+          ontology:
+            type:
+              - string
+              - 'null'
+            description: Sequence Ontology identifier.
+          css:
+            type: string
+            description: Type class name in SBOL Visual CSS.
+          also:
+            type: array
+            description: Alternative names and synonyms used to infer the type.
+            items:
+              type: string
+          slug:
+            type: string
+            description: New iGEM standard for storing types.
 
