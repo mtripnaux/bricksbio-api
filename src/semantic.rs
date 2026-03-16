@@ -72,7 +72,9 @@ fn embedding_model() -> Result<&'static Mutex<TextEmbedding>, Box<dyn std::error
         return Ok(model);
     }
 
-    let options = InitOptions::new(EmbeddingModel::AllMiniLML6V2);
+    let options = InitOptions::new(EmbeddingModel::AllMiniLML6V2)
+        .with_show_download_progress(true)
+        .with_max_threads(1);
     let embedding = TextEmbedding::try_new(options)?;
     Ok(MODEL.get_or_init(|| Mutex::new(embedding)))
 }
