@@ -21,6 +21,14 @@
         justify-content: space-between;
         top: 0;
         z-index: 100;
+        font-family: var(--scalar-font-family, system-ui, Roboto, sans-serif);
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+        pointer-events: none; /* Empêche de cliquer tant qu'il n'est pas là */
+      }
+      .custom-header.is-ready {
+        opacity: 1;
+        pointer-events: auto;
       }
       .custom-header,
       .custom-header nav {
@@ -30,8 +38,8 @@
       }
       .custom-header a {
         text-decoration: none;
-        color: var(--scalar-color-1);
-        font-size: var(--scalar-font-size-2);
+        color: var(--scalar-color-1, black);
+        font-size: var(--scalar-font-size-2, 2em);
       }
       .custom-header .logo-container img {
         height: 60%;
@@ -45,7 +53,7 @@
         height: 100%;
       }
     </style>
-    <header class="custom-header scalar-app">
+    <header class="custom-header scalar-app" id="site-header">
       <div class="logo-container">
         <img src="/assets/bricks.png" alt="logo"/>
         <b>Bricks.bio</b>
@@ -118,6 +126,21 @@
           "clientKey": "requests"
         }
     }'>
+    </script>
+    <script>
+      const revealHeader = () => {
+        const header = document.getElementById('site-header');
+        const isScalarLoaded = getComputedStyle(document.documentElement)
+          .getPropertyValue('--scalar-font-size-1').trim() !== "";
+
+        if (isScalarLoaded) {
+          header.classList.add('is-ready');
+        } else {
+          setTimeout(revealHeader, 50);
+        }
+      };
+
+      window.addEventListener('DOMContentLoaded', revealHeader);
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
