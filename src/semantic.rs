@@ -87,8 +87,6 @@ fn biobrick_to_text(biobrick: &Biobrick) -> String {
     text.push_str(&biobrick.metadata.description);
     text.push_str("\ntype: ");
     text.push_str(&biobrick.metadata.r#type.canonical);
-    text.push(' ');
-    text.push_str(&biobrick.metadata.r#type.slug);
 
     if !biobrick.metadata.authors.is_empty() {
         text.push_str("\nauthors: ");

@@ -8,11 +8,18 @@ info:
     ## Providers
 
     - [`iGEM Parts Registry (Legacy)`](https://parts.igem.org/) is a HTML scraper.
-    - [`iGEM Registry`](https://registry.igem.org) is a refactor from a single JSON request.
+    - [`iGEM Registry`](https://registry.igem.org) is a single JSON request.
     - [`iGEM via SynBioHub`](https://synbiohub.org/public/igem/igem_collection/1) is a SBOL and GenBank parser.
     - [`Ensembl`](https://www.ensembl.org) is a GenBank parser.
     - [`NCBI`](https://www.ncbi.nlm.nih.gov/) is a GenBank parser.
     - [`AddGene`](https://www.addgene.org/) is a HTML scraper.
+
+    ## Types
+
+      - `canonical` is a standardized custom format.
+      - `ontology` is the [Sequence Ontology](http://sequenceontology.org/) identifier.
+      - `visual` is the type's name in [SBOL Visual CSS](https://mtripnaux.github.io/SBOL-Visual-CSS/reference.html).
+      - `slug` is the new iGEM standard for storing types.
   version: 0.1.0
   licence: GPL-3.0+
   contact:
@@ -293,7 +300,7 @@ components:
         description: Represents the type of a sequence.
         required:
           - canonical
-          - css
+          - visual
           - also
           - slug
         properties:
@@ -305,8 +312,10 @@ components:
               - string
               - 'null'
             description: Sequence Ontology identifier.
-          css:
-            type: string
+          visual:
+            type: 
+              - string
+              - 'null'
             description: Type class name in SBOL Visual CSS.
           also:
             type: array
@@ -314,6 +323,8 @@ components:
             items:
               type: string
           slug:
-            type: string
+            type: 
+              - string
+              - 'null'
             description: New iGEM standard for storing types.
 

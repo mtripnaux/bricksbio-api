@@ -15,6 +15,7 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use crate::ontology::{ONTOLOGY, OntologyEntrySerializable};
 use std::{collections::HashSet, sync::Arc};
 use axum::extract::Query;
 use tower_http::services::ServeDir;
@@ -51,6 +52,7 @@ async fn main() {
         .nest_service("/assets", ServeDir::new("assets"))
         .route("/parts/:id", get(get_part))
         .route("/parts/:id/sbol", get(get_part_sbol))
+        .route("/ontology", get(get_ontology))
         .with_state(state);
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
@@ -167,4 +169,10 @@ async fn get_part_sbol(
             Json(json!({ "message": "Part not found" })),
         )),
     }
+}
+
+#[axum::debug_handler]
+async fn get_ontology() -> Json<Vec<OntologyEntrySerializable>> {
+    let serializable: Vec<OntologyEntrySerializable> = ONTOLOGY.iter().map(OntologyEntrySerializable::from).collect();
+    Json(serializable)
 }

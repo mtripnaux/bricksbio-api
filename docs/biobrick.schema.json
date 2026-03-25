@@ -96,16 +96,16 @@
     },
     "OntologyEntry": {
       "type": "object",
-      "required": ["canonical", "css", "also", "slug"],
+      "required": ["canonical", "also"],
       "properties": {
         "canonical": { "type": "string" },
         "ontology": { "type": ["string", "null"] },
-        "css": { "type": "string" },
+        "visual": { "type": ["string", "null"] },
         "also": {
           "type": "array",
           "items": { "type": "string" }
         },
-        "slug": { "type": "string" }
+        "slug": { "type": ["string", "null"] }
       }
     }
   }
