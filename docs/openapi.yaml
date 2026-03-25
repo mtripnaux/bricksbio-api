@@ -136,6 +136,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /ontology:
+    get:
+      summary: Get ontology data
+      description: Returns a list of types and their matching with different ontologies.
+      responses:
+        '200':
+          description: Current ontology data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Type'
 components:
   schemas:
     CacheStats:
