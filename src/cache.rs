@@ -30,10 +30,17 @@ impl SqliteCache {
         let connection = self.connection.lock().unwrap();
         connection.execute_batch(
             "
+            PRAGMA journal_mode=WAL;
             CREATE TABLE IF NOT EXISTS parts_cache (
                 id_normalized TEXT PRIMARY KEY,
                 biobrick_json TEXT NOT NULL,
                 cached_at TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS usage_log (
+                ip TEXT NOT NULL,
+                date TEXT NOT NULL,
+                request_count INTEGER NOT NULL DEFAULT 0,
+                PRIMARY KEY (ip, date)
             );
             ",
         )?;
@@ -81,6 +88,64 @@ impl SqliteCache {
             [],
             |row| row.get(0),
         )
+    }
+
+    pub fn record_request(&self, ip: &str) -> Result<(), rusqlite::Error> {
+        let date = Utc::now().format("%Y-%m-%d").to_string();
+        let connection = self.connection.lock().unwrap();
+        connection.execute(
+            "
+            INSERT INTO usage_log (ip, date, request_count)
+            VALUES (?1, ?2, 1)
+            ON CONFLICT(ip, date) DO UPDATE SET request_count = request_count + 1
+            ",
+            params![ip, date],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_api_stats(&self) -> Result<crate::types::ApiStats, rusqlite::Error> {
+        let today = Utc::now().format("%Y-%m-%d").to_string();
+        let week_ago = (Utc::now() - chrono::Duration::days(7)).format("%Y-%m-%d").to_string();
+        let connection = self.connection.lock().unwrap();
+
+        let unique_ips_today: i64 = connection.query_row(
+            "SELECT COUNT(DISTINCT ip) FROM usage_log WHERE date = ?1",
+            params![today],
+            |row| row.get(0),
+        )?;
+
+        let unique_ips_total: i64 = connection.query_row(
+            "SELECT COUNT(DISTINCT ip) FROM usage_log",
+            [],
+            |row| row.get(0),
+        )?;
+
+        let requests_today: i64 = connection.query_row(
+            "SELECT COALESCE(SUM(request_count), 0) FROM usage_log WHERE date = ?1",
+            params![today],
+            |row| row.get(0),
+        )?;
+
+        let requests_total: i64 = connection.query_row(
+            "SELECT COALESCE(SUM(request_count), 0) FROM usage_log",
+            [],
+            |row| row.get(0),
+        )?;
+
+        let unique_ips_last_7_days: i64 = connection.query_row(
+            "SELECT COUNT(DISTINCT ip) FROM usage_log WHERE date >= ?1",
+            params![week_ago],
+            |row| row.get(0),
+        )?;
+
+        Ok(crate::types::ApiStats {
+            unique_ips_today,
+            unique_ips_total,
+            requests_today,
+            requests_total,
+            unique_ips_last_7_days,
+        })
     }
 
     pub fn list_parts(&self) -> Result<Vec<Biobrick>, rusqlite::Error> {

@@ -136,6 +136,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /stats:
+    get:
+      summary: Get API usage stats
+      description: Returns the number of unique clients and total requests over various time periods.
+      responses:
+        '200':
+          description: Current API usage statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiStats'
+        '500':
+          description: Statistics could not be read
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /ontology:
     get:
       summary: Get ontology data
@@ -151,6 +168,30 @@ paths:
                   $ref: '#/components/schemas/Type'
 components:
   schemas:
+    ApiStats:
+      type: object
+      required:
+        - unique_ips_today
+        - unique_ips_total
+        - requests_today
+        - requests_total
+        - unique_ips_last_7_days
+      properties:
+        unique_ips_today:
+          type: integer
+          example: 12
+        unique_ips_total:
+          type: integer
+          example: 340
+        requests_today:
+          type: integer
+          example: 87
+        requests_total:
+          type: integer
+          example: 15420
+        unique_ips_last_7_days:
+          type: integer
+          example: 64
     CacheStats:
       type: object
       required:

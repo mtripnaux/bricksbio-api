@@ -73,3 +73,12 @@ pub struct SearchResponse {
     pub count: usize,
     pub results: Vec<SearchHit>,
 }
+
+#[derive(Debug, Serialize)]
+pub struct ApiStats {
+    pub unique_ips_today: i64,
+    pub unique_ips_total: i64,
+    pub requests_today: i64,
+    pub requests_total: i64,
+    pub unique_ips_last_7_days: i64,
+}
